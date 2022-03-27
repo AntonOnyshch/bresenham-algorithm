@@ -1,0 +1,40 @@
+body {
+    margin: 0;
+    display: flex;
+}
+#header {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5em;
+}
+#header div {
+    border: 1px solid rgb(211, 211, 211);
+    padding: .3em;
+}
+#setCoordsPanel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+#setCoordsPanel input {
+    width: 80px;
+}
+#setCoordsPanel > button {
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+#setCoordsPanel * {
+    margin: .3em;
+}
+#wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 40px);
+    grid-template-rows: 1fr;
+    grid-gap: 1.2px;
+    flex: 1;
+}
+
+#wrapper div {
+    background-color: whitesmoke;
+    padding: 1em;
+    aspect-ratio: 1/1;
+}

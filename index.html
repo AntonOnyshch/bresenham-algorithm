@@ -1,0 +1,43 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Computed Tomography Viewer</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body onresize="window.bresenhamsAlgorithm.onresize()">
+    <section id="header">
+        <div id="setCoordsPanel">
+            <input id="x0Input" type="text" placeholder="x0"/>
+            <input id="y0Input" type="text" placeholder="y0"/>
+            <input id="x1Input" type="text" placeholder="x1"/>
+            <input id="y1Input" type="text" placeholder="y1"/>
+            <button 
+            onclick="window.bresenhamsAlgorithm.setNewCoords(x0Input.value, y0Input.value, x1Input.value, y1Input.value)">
+            Refresh</button>
+        </div>
+        <div>
+            <strong>Static Information: </strong>
+            <pre>
+steep: <span id="steep"></span>
+dx:    <span id="dx"></span>
+dxMulBy2:    <span id="dxMulBy2"></span>
+dy:    <span id="dy"></span>
+derror:    <span id="derror"></span>
+y_direction:    <span id="y_direction"></span>
+            </pre>
+        </div>
+        <div>
+            <strong>Dynamic Information</strong>
+            <pre>
+error: <span id="error"></span>
+x: <span id="x"></span>
+y: <span id="y"></span>
+            </pre>
+        </div>
+    </section>
+    <main id="wrapper">
+    </main>
+    <script src="index.js"></script>
+  </body>
+</html>
