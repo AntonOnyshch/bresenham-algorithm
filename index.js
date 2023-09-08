@@ -1,171 +1,199 @@
-window.bresenhamsAlgorithm = {
-    main: HTMLElement,
-    scrWidth: 0,
-    scrHeight: 0,
-    cellsByW: 0,
-    cellsByH: 0,
-    allCells: 0,
-    x0: 0,
-    y0: 0,
-    x1: 0,
-    y1: 0,
-    backLayerArray: Array,
-    init() {
-        this.main = document.getElementById('wrapper');
-        this.onresize();
-        this.setCoords(0, Math.round(this.cellsByH * 0.7), this.cellsByW, Math.round(this.cellsByH * 0.3));
-        this.drawBackLayer();
-    },
-    onresize() {
-        this.scrWidth = document.body.offsetWidth - document.getElementById('header').offsetWidth;
-        this.scrHeight = document.body.offsetHeight;
-        const cellsByW = this.getCountOfCells(this.scrWidth);
-        const cellsByH = this.getCountOfCells(this.scrHeight);
+let gap = 1.2;
+let cellSize = 40;
+let resolutionWidth = 0;
+let resolutionHeight = 0;
 
-        this.recountOfCells(cellsByW, cellsByH);
+let x1 = -1;
+let y1 = -1;
+let x2 = -1;
+let y2 = -1;
 
-        this.cellsByW = cellsByW;
-        this.cellsByH = cellsByH;
-        this.allCells = cellsByW * cellsByH;
-    },
-    getCountOfCells(by = 0, cellWidth = 40) {
-        const withoutGap = by / cellWidth;
-        return Math.floor((by  - (withoutGap - 1)) / cellWidth);
-    },
-    setCells() {
-        for (let i = 0; i < 1; i++) {
-            for (let j = 0; j < this.cellsByW; j++) {
-                this.main.appendChild(document.createElement("div"));
-            }
-        }
-    },
-    recountOfCells(newCountW, newCountH) {
-        const allNewCells = newCountW * newCountH;
-        if(allNewCells > this.allCells) {
-            for (let i = 0; i < allNewCells - this.allCells; i++) {
-                this.main.appendChild(document.createElement("div"));
-            }
-        } else {
-            for (let i = 0; i < this.allCells - allNewCells; i++) {
-                this.main.removeChild(this.main.children.item(i));
-            }
-        }
-    },
-    setCoords(x0, y0, x1, y1) {
-        this.x0 = x0;
-        this.y0 = y0;
-        this.x1 = x1;
-        this.y1 = y1;
-    },
-    drawBackLayer() {
-        this.backLayerArray = this.getLine(this.x0, this.y0, this.x1, this.y1);
-        let index = 0;
-        let el;
-        const backgroundColor = 'lightgray';
-        for (let i = 0; i < this.backLayerArray.length; i++) {
-            index = this.cellsByW * this.backLayerArray[i].y + this.backLayerArray[i].x;
-            el = this.main.children[index];
-            el.style.backgroundColor = backgroundColor;
-            el.setAttribute('data-index', i);
-            el.addEventListener('mouseover', this.onElMouseOver.bind(this));
-            el.addEventListener('mouseout', this.onElMouseOut.bind(this));
-        }
-    },
-    getLine(x0 = 0, y0 = 0, x1 = 0, y1 = 0) {
-        const lineArray = new Array();
-        let steep = false;
+const wrapper = document.getElementById('wrapper');
 
-        //#region Swap Coordinates and set "steep"
+function init() {
+    initGrid();
+    new ResizeObserver((e) => e.forEach(() => initGrid())).observe(wrapper);
+}
 
-        // if the line is steep, we transpose the coordinates
-        if (Math.abs(x0 - x1) < Math.abs(y0 - y1)) {
-            x0 = x0 ^ y0;
-            y0 = x0 ^ y0;
-            x0 = x0 ^ y0;
+function initGrid() {
+
+    wrapper.style.gap = `${gap}px`;
+    wrapper.replaceChildren();
+
+    resolutionWidth = Math.floor(wrapper.offsetWidth / (40 + gap));
+    resolutionHeight = Math.floor(wrapper.offsetHeight / (40 + gap));
+
+    if(x1 === -1) {
+        x1 = 0;
+        y1 = resolutionHeight - 1;
+        x2 = resolutionWidth - 1;
+        y2 = 0;
+    }
+
+    const x1Input = document.getElementById('x1Input');
+    const y1Input = document.getElementById('y1Input');
+    const x2Input = document.getElementById('x2Input');
+    const y2Input = document.getElementById('y2Input');
+
+    x1Input.max = resolutionWidth - 1;
+    x1Input.setAttribute('value', x1);
+    y1Input.max = resolutionHeight - 1;
+    y1Input.setAttribute('value', y1);
+
+    x2Input.max = resolutionWidth - 1;
+    x2Input.setAttribute('value', x2);
+    y2Input.max = resolutionHeight - 1;
+    y2Input.setAttribute('value', y2);
+
+    wrapper.style.gridTemplateColumns = `repeat(${resolutionWidth}, ${cellSize}px)`;
+    wrapper.style.gridTemplateRows = `repeat(${resolutionHeight}, ${cellSize}px)`;
+
+    for (let i = 0; i < resolutionWidth * resolutionHeight; i++) {
+        const div = document.createElement("div");
+        div.setAttribute('data-index', i);
+        wrapper.appendChild(div);
+    }
+
     
-            x1 = x1 ^ y1;
-            y1 = x1 ^ y1;
-            x1 = x1 ^ y1;
-
-            steep = true;
-        }
-        // make it left-to-right if x0 > x1
-        if (x0 > x1) {
-            x0 = x0 ^ x1;
-            x1 = x0 ^ x1;
-            x0 = x0 ^ x1;
     
-            y0 = y0 ^ y1;
-            y1 = y0 ^ y1;
-            y0 = y0 ^ y1;
-        }
+    drawLine(x1, y1, x2, y2);;
+}
 
-        //#endregion
+function drawLine(x1, y1, x2, y2) {
 
-        const dx          = x1-x0;
-        const dxMulBy2    = dx*2;
-        const dy          = y1-y0;
-        const derror      = Math.abs(dy)*2;
-        const y_direction = y1>y0?1:-1;
+    let steep = false;
 
-        let error = 0;
-        let y     = y0;
-        let x     = x0;
-        
-        for (let i = 0; x < x1; x++, i++) {
-            if(steep) {
-                lineArray.push({x: x, y: y, error: error});
-            } else {
-                lineArray.push({x: x, y: y, error: error});
-            }
+    // if the line is steep, we transpose the coordinates
+    if (Math.abs(x1 - x2) < Math.abs(y1 - y2)) {
+        x1 = x1 ^ y1;
+        y1 = x1 ^ y1;
+        x1 = x1 ^ y1;
+        x2 = x2 ^ y2;
+        y2 = x2 ^ y2;
+        x2 = x2 ^ y2;
 
-            //setting error
+        steep = true;
+    }
+    // make it left-to-right if x1 > x2
+    if (x1 > x2) {
+        x1 = x1 ^ x2;
+        x2 = x1 ^ x2;
+        x1 = x1 ^ x2;
+        y1 = y1 ^ y2;
+        y2 = y1 ^ y2;
+        y1 = y1 ^ y2;
+    }
+
+    let childrenIndex = 0;
+    const dx = x2-x1;
+    const dx2 = dx + dx;
+    const dy = y2-y1;
+    const derror = Math.abs(dy + dy);
+    let error = 0;
+    let y = y1;
+    const yDirection = y2 > y1 ? 1 : -1;
+    
+    if(steep) {
+        for (let x=x1; x<=x2; x++) {
+
+            childrenIndex = (x * resolutionWidth) + y;
+
+            wrapper.children[childrenIndex].style.backgroundColor = 'lightgray';
             error += derror;
-            if(error > dx) {
-                y     += y_direction;
-                error -= dxMulBy2;
+
+            setHandlers(wrapper.children[childrenIndex]);
+            setDynamicInfo(wrapper.children[childrenIndex], y, x, error);
+    
+            if (error > dx) {
+                y += yDirection;
+                error -= dx2;
             }
         }
+    } else {
+        for (let x=x1; x<=x2; x++) {
 
-        //Set static information:
-        document.getElementById('steep').textContent = steep;
-        document.getElementById('dx').textContent = dx;
-        document.getElementById('dxMulBy2').textContent = dxMulBy2;
-        document.getElementById('dy').textContent = dy;
-        document.getElementById('derror').textContent = derror;
-        document.getElementById('y_direction').textContent = y_direction;
+            childrenIndex = (y * resolutionWidth) + x;
 
-        
+            wrapper.children[childrenIndex].style.backgroundColor = 'lightgray';
+            error += derror;
 
-        return lineArray;
-    },
-    clearLine() {
-        let el;
-        for (let i = 0; i < this.backLayerArray.length; i++) {
-            el = this.main.children[this.cellsByW * this.backLayerArray[i].y + this.backLayerArray[i].x];
-            el.style.backgroundColor = 'whitesmoke';
-            el.removeAttribute('data-index');
-            el.removeEventListener('mosueover', this.onDivHover);
+            setHandlers(wrapper.children[childrenIndex]);
+            setDynamicInfo(wrapper.children[childrenIndex], x, y, error);
+    
+            if (error > dx) {
+                y += yDirection;
+                error -= dx2;
+            }
         }
-    },
-    setNewCoords(x0, y0, x1, y1) {
-        this.setCoords(parseInt(x0), parseInt(y0), parseInt(x1), parseInt(y1));
-        this.clearLine();
-        this.drawBackLayer();
-    },
-    onElMouseOver(e) {
-        const index = parseInt(e.target.getAttribute('data-index'));
-        const value = this.backLayerArray[index];
-        
-        e.target.style.backgroundColor = 'orange';
+    }
 
-        document.getElementById('error').textContent = value.error;
-        document.getElementById('x').textContent = value.x;
-        document.getElementById('y').textContent = value.y;
-    },
-    onElMouseOut(e) {
-        e.target.style.backgroundColor = 'lightgray';
+    setStaticInfo(steep, dx, dy, yDirection);
+}
+
+/**
+ * 
+ * @param {HTMLDivElement} cell 
+ */
+function setHandlers(cell) {
+    cell.onmouseover = e => {
+        e.currentTarget.style.backgroundColor = 'orange';
+        document.getElementById('error').textContent = e.currentTarget.getAttribute('data-error');
+        document.getElementById('x').textContent = e.currentTarget.getAttribute('data-x');
+        document.getElementById('y').textContent = e.currentTarget.getAttribute('data-y');
+    }
+
+    cell.onmouseleave = e => {
+        e.currentTarget.style.backgroundColor = 'lightgray';
     }
 }
 
-window.bresenhamsAlgorithm.init();
+/**
+ * 
+ * @param {HTMLDivElement} cell 
+ * @param {number} x 
+ * @param {number} y 
+ * @param {number} error 
+ */
+function setDynamicInfo(cell, x, y, error) {
+
+    cell.style.backgroundColor = 'lightgray';
+    cell.setAttribute('data-error', error.toPrecision(3));
+    cell.setAttribute('data-x', x + 1);
+    cell.setAttribute('data-y', y + 1);
+}
+
+/**
+ * 
+ * @param {boolean} steep 
+ * @param {number} dX 
+ * @param {number} dY 
+ * @param {number} yDirection 
+ */
+function setStaticInfo(steep, dX, dY, yDirection) {
+    document.getElementById('steep').textContent = steep;
+    document.getElementById('dx').textContent = dX;
+    document.getElementById('dy').textContent = dY;
+    document.getElementById('y_direction').textContent = yDirection;
+}
+
+document.getElementById('x1Input').oninput = e => {
+    x1 = +e.currentTarget.value;
+    initGrid();
+}
+
+document.getElementById('y1Input').oninput = e => {
+    y1 = +e.currentTarget.value;
+    initGrid();
+}
+
+document.getElementById('x2Input').oninput = e => {
+    x2 = +e.currentTarget.value;
+    initGrid();
+}
+
+document.getElementById('y2Input').oninput = e => {
+    y2 = +e.currentTarget.value;
+    initGrid();
+}
+
+init();

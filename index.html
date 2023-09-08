@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -5,29 +6,29 @@
     <title>Bresenham's Algorithm</title>
     <link rel="stylesheet" href="index.css" />
   </head>
-  <body onresize="window.bresenhamsAlgorithm.onresize()">
+  <body>
     <section id="header">
         <div id="setCoordsPanel">
-            <input id="x0Input" type="text" placeholder="x0"/>
-            <input id="y0Input" type="text" placeholder="y0"/>
-            <input id="x1Input" type="text" placeholder="x1"/>
-            <input id="y1Input" type="text" placeholder="y1"/>
-            <button 
-            onclick="window.bresenhamsAlgorithm.setNewCoords(x0Input.value, y0Input.value, x1Input.value, y1Input.value)">
-            Refresh</button>
+            <label for="x1Input">X1 coords</label>
+            <input id="x1Input" type="range" min="0" value=""/>
+            <label for="y1Input">Y1 coords</label>
+            <input id="y1Input" type="range" min="0" value=""/>
+
+            <label for="x2Input">X2 coords</label>
+            <input id="x2Input" type="range" min="0" value=""/>
+            <label for="y2Input">Y2 coords</label>
+            <input id="y2Input" type="range" min="0" value=""/>
         </div>
         <div>
             <strong>Static Information: </strong>
             <pre>
 steep: <span id="steep"></span>
 dx:    <span id="dx"></span>
-dxMulBy2:    <span id="dxMulBy2"></span>
 dy:    <span id="dy"></span>
-derror:    <span id="derror"></span>
 y_direction:    <span id="y_direction"></span>
             </pre>
         </div>
-        <div>
+        <div id="dynamic_info_ctn">
             <strong>Dynamic Information</strong>
             <pre>
 error: <span id="error"></span>

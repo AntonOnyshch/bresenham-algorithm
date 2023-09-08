@@ -1,6 +1,10 @@
+html {
+    height: 100%;
+}
 body {
     margin: 0;
     display: flex;
+    height: inherit;
 }
 #header {
     display: flex;
@@ -10,6 +14,9 @@ body {
 #header div {
     border: 1px solid rgb(211, 211, 211);
     padding: .3em;
+}
+#dynamic_info_ctn {
+    color: orange;
 }
 #setCoordsPanel {
     display: grid;
@@ -27,14 +34,10 @@ body {
 }
 #wrapper {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 40px);
-    grid-template-rows: 1fr;
-    grid-gap: 1.2px;
     flex: 1;
 }
 
 #wrapper div {
     background-color: whitesmoke;
     padding: 1em;
-    aspect-ratio: 1/1;
 }
