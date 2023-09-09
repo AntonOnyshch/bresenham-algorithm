@@ -20,15 +20,18 @@ function initGrid() {
     wrapper.style.gap = `${gap}px`;
     wrapper.replaceChildren();
 
-    resolutionWidth = Math.floor(wrapper.offsetWidth / (40 + gap));
-    resolutionHeight = Math.floor(wrapper.offsetHeight / (40 + gap));
+    const resWidth = Math.floor(wrapper.offsetWidth / (40 + gap));
+    const resHeight = Math.floor(wrapper.offsetHeight / (40 + gap));
 
-    if(x1 === -1) {
+    if(x1 === -1 || resWidth !== resolutionWidth || resHeight !== resolutionHeight) {
         x1 = 0;
-        y1 = resolutionHeight - 1;
-        x2 = resolutionWidth - 1;
+        y1 = resHeight - 1;
+        x2 = resWidth - 1;
         y2 = 0;
     }
+
+    resolutionWidth = resWidth;
+    resolutionHeight = resHeight;
 
     const x1Input = document.getElementById('x1Input');
     const y1Input = document.getElementById('y1Input');
@@ -88,7 +91,7 @@ function drawLine(x1, y1, x2, y2) {
     const dx = x2-x1;
     const dx2 = dx + dx;
     const dy = y2-y1;
-    const derror = Math.abs(dy + dy);
+    const derror = Math.abs(dy);
     let error = 0;
     let y = y1;
     const yDirection = y2 > y1 ? 1 : -1;
@@ -96,34 +99,38 @@ function drawLine(x1, y1, x2, y2) {
     if(steep) {
         for (let x=x1; x<=x2; x++) {
 
-            childrenIndex = (x * resolutionWidth) + y;
-
-            wrapper.children[childrenIndex].style.backgroundColor = 'lightgray';
             error += derror;
+            if (error > dx) {
+                y += yDirection;
+                error -= dx;
+            }
+
+            childrenIndex = (x * resolutionWidth) + y;
+            
+            wrapper.children[childrenIndex].style.backgroundColor = 'lightgray';
 
             setHandlers(wrapper.children[childrenIndex]);
             setDynamicInfo(wrapper.children[childrenIndex], y, x, error);
     
-            if (error > dx) {
-                y += yDirection;
-                error -= dx2;
-            }
+
         }
     } else {
         for (let x=x1; x<=x2; x++) {
 
+            error += derror;
+            if (error > dx) {
+                y += yDirection;
+                error -= dx;
+            }
+
             childrenIndex = (y * resolutionWidth) + x;
 
             wrapper.children[childrenIndex].style.backgroundColor = 'lightgray';
-            error += derror;
 
             setHandlers(wrapper.children[childrenIndex]);
             setDynamicInfo(wrapper.children[childrenIndex], x, y, error);
     
-            if (error > dx) {
-                y += yDirection;
-                error -= dx2;
-            }
+
         }
     }
 
