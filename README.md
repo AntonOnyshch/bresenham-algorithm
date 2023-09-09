@@ -3,7 +3,11 @@ Small site presentation of this algorithm where you can see how error would chan
 
 
 
-https://user-images.githubusercontent.com/58116769/160280640-e69f5460-323d-4148-98a8-e4809c27efa3.mp4
+
+
+
+https://github.com/AntonOnyshch/bresenham-algorithm/assets/58116769/11cf1292-cc4c-4df7-be8a-5293513f5d47
+
 
 
 
