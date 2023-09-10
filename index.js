@@ -88,18 +88,19 @@ function drawLine(x1, y1, x2, y2) {
     }
 
     let childrenIndex = 0;
+
     const dx = x2-x1;
-    const dx2 = dx + dx;
-    const dy = y2-y1;
-    const derror = Math.abs(dy);
+
+    const slope = Math.abs(y2-y1);
     let error = 0;
+
     let y = y1;
     const yDirection = y2 > y1 ? 1 : -1;
     
     if(steep) {
         for (let x=x1; x<=x2; x++) {
 
-            error += derror;
+            error += slope;
             if (error > dx) {
                 y += yDirection;
                 error -= dx;
@@ -111,13 +112,12 @@ function drawLine(x1, y1, x2, y2) {
 
             setHandlers(wrapper.children[childrenIndex]);
             setDynamicInfo(wrapper.children[childrenIndex], y, x, error);
-    
 
         }
     } else {
         for (let x=x1; x<=x2; x++) {
 
-            error += derror;
+            error += slope;
             if (error > dx) {
                 y += yDirection;
                 error -= dx;
@@ -130,11 +130,10 @@ function drawLine(x1, y1, x2, y2) {
             setHandlers(wrapper.children[childrenIndex]);
             setDynamicInfo(wrapper.children[childrenIndex], x, y, error);
     
-
         }
     }
 
-    setStaticInfo(steep, dx, dy, yDirection);
+    setStaticInfo(steep, dx, y2-y1, yDirection);
 }
 
 /**
